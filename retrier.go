@@ -13,7 +13,15 @@ func NewRetrier(operation Operation) Retrier {
 
 func (r *Retrier) Run() error {
 	r.tries++
-	return r.operation.Try()
+	retryable, err := r.operation.Try()
+	if err != nil {
+		if !retryable {
+			return err
+		}
+		return r.Run()
+	}
+
+	return nil
 }
 
 func (r Retrier) Tries() int {
