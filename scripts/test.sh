@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -eu
 
-ginkgo -r --randomizeAllSpecs --randomizeSuites --cover
+ginkgo -r -p --randomizeAllSpecs --randomizeSuites --cover
