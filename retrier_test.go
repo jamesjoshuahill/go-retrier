@@ -58,4 +58,47 @@ var _ = Describe("Retrier", func() {
 			})
 		})
 	})
+
+	Context("example operation", func() {
+		It("tries once", func() {
+			operation := NewSimpleOperation()
+			retrier := retry.NewRetrier(&operation)
+
+			err := retrier.Run()
+
+			Expect(err).NotTo(HaveOccurred())
+			Expect(retrier.Tries()).To(Equal(2))
+		})
+	})
 })
+
+type simpleOperation struct {
+	attempts    int
+	maxAttempts int
+	retry       bool
+	err         error
+}
+
+func NewSimpleOperation() simpleOperation {
+	return simpleOperation{
+		maxAttempts: 2,
+	}
+}
+
+func (o *simpleOperation) Try() {
+	o.attempts++
+	if o.attempts == o.maxAttempts {
+		o.retry = false
+	} else {
+		o.retry = true
+	}
+	o.err = errors.New("blurgh")
+}
+
+func (o simpleOperation) Retry() bool {
+	return o.retry
+}
+
+func (o simpleOperation) Error() error {
+	return o.err
+}
