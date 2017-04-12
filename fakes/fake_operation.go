@@ -8,22 +8,20 @@ import (
 )
 
 type FakeOperation struct {
-	TryStub        func() (retry bool, err error)
+	TryStub        func() error
 	tryMutex       sync.RWMutex
 	tryArgsForCall []struct{}
 	tryReturns     struct {
-		result1 bool
-		result2 error
+		result1 error
 	}
 	tryReturnsOnCall map[int]struct {
-		result1 bool
-		result2 error
+		result1 error
 	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOperation) Try() (retry bool, err error) {
+func (fake *FakeOperation) Try() error {
 	fake.tryMutex.Lock()
 	ret, specificReturn := fake.tryReturnsOnCall[len(fake.tryArgsForCall)]
 	fake.tryArgsForCall = append(fake.tryArgsForCall, struct{}{})
@@ -33,9 +31,9 @@ func (fake *FakeOperation) Try() (retry bool, err error) {
 		return fake.TryStub()
 	}
 	if specificReturn {
-		return ret.result1, ret.result2
+		return ret.result1
 	}
-	return fake.tryReturns.result1, fake.tryReturns.result2
+	return fake.tryReturns.result1
 }
 
 func (fake *FakeOperation) TryCallCount() int {
@@ -44,26 +42,23 @@ func (fake *FakeOperation) TryCallCount() int {
 	return len(fake.tryArgsForCall)
 }
 
-func (fake *FakeOperation) TryReturns(result1 bool, result2 error) {
+func (fake *FakeOperation) TryReturns(result1 error) {
 	fake.TryStub = nil
 	fake.tryReturns = struct {
-		result1 bool
-		result2 error
-	}{result1, result2}
+		result1 error
+	}{result1}
 }
 
-func (fake *FakeOperation) TryReturnsOnCall(i int, result1 bool, result2 error) {
+func (fake *FakeOperation) TryReturnsOnCall(i int, result1 error) {
 	fake.TryStub = nil
 	if fake.tryReturnsOnCall == nil {
 		fake.tryReturnsOnCall = make(map[int]struct {
-			result1 bool
-			result2 error
+			result1 error
 		})
 	}
 	fake.tryReturnsOnCall[i] = struct {
-		result1 bool
-		result2 error
-	}{result1, result2}
+		result1 error
+	}{result1}
 }
 
 func (fake *FakeOperation) Invocations() map[string][][]interface{} {
