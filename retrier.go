@@ -14,13 +14,14 @@ func NewRetrier(operation Operation) Retrier {
 func (r *Retrier) Run() error {
 	for {
 		r.tries++
-		r.operation.Try()
-		if !r.operation.Retry() {
-			break
+		retry, err := r.operation.Try()
+		if err == nil {
+			return nil
+		}
+		if !retry {
+			return err
 		}
 	}
-
-	return r.operation.Error()
 }
 
 func (r Retrier) Tries() int {

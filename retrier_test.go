@@ -13,8 +13,7 @@ var _ = Describe("Retrier", func() {
 	Context("when the operation succeeds", func() {
 		It("tries once", func() {
 			operation := new(fakes.FakeOperation)
-			operation.RetryReturns(false)
-			operation.ErrorReturns(nil)
+			operation.TryReturns(false, nil)
 			retrier := retry.NewRetrier(operation)
 
 			err := retrier.Run()
@@ -30,8 +29,7 @@ var _ = Describe("Retrier", func() {
 			It("returns the error", func() {
 				operation := new(fakes.FakeOperation)
 				operationErr := errors.New("operation failed")
-				operation.RetryReturns(false)
-				operation.ErrorReturns(operationErr)
+				operation.TryReturns(false, operationErr)
 				retrier := retry.NewRetrier(operation)
 
 				err := retrier.Run()
@@ -45,9 +43,8 @@ var _ = Describe("Retrier", func() {
 		Context("and is retryable", func() {
 			It("retries the operation", func() {
 				operation := new(fakes.FakeOperation)
-				operation.RetryReturnsOnCall(0, true)
-				operation.RetryReturnsOnCall(1, false)
-				operation.ErrorReturns(nil)
+				operation.TryReturnsOnCall(0, true, errors.New("operation failed"))
+				operation.TryReturnsOnCall(1, false, nil)
 				retrier := retry.NewRetrier(operation)
 
 				err := retrier.Run()
