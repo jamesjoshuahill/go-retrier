@@ -8,7 +8,7 @@ import (
 )
 
 type FakeOperation struct {
-	TryStub        func() (bool, error)
+	TryStub        func() (retry bool, err error)
 	tryMutex       sync.RWMutex
 	tryArgsForCall []struct{}
 	tryReturns     struct {
@@ -23,7 +23,7 @@ type FakeOperation struct {
 	invocationsMutex sync.RWMutex
 }
 
-func (fake *FakeOperation) Try() (bool, error) {
+func (fake *FakeOperation) Try() (retry bool, err error) {
 	fake.tryMutex.Lock()
 	ret, specificReturn := fake.tryReturnsOnCall[len(fake.tryArgsForCall)]
 	fake.tryArgsForCall = append(fake.tryArgsForCall, struct{}{})

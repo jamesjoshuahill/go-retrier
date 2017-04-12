@@ -11,16 +11,17 @@ import (
 
 var _ = Describe("Retrier", func() {
 	Context("when the operation succeeds", func() {
-		It("tries once", func() {
+		It("returns the operation", func() {
 			operation := new(fakes.FakeOperation)
 			operation.TryReturns(false, nil)
 			retrier := retry.NewRetrier(operation)
 
-			err := retrier.Run()
+			actualOperation, err := retrier.Run()
 
 			Expect(err).NotTo(HaveOccurred())
 			Expect(retrier.Tries()).To(Equal(1))
 			Expect(operation.TryCallCount()).To(Equal(1))
+			Expect(actualOperation).To(Equal(operation))
 		})
 	})
 
@@ -32,11 +33,12 @@ var _ = Describe("Retrier", func() {
 				operation.TryReturns(false, operationErr)
 				retrier := retry.NewRetrier(operation)
 
-				err := retrier.Run()
+				actualOperation, err := retrier.Run()
 
 				Expect(err).To(Equal(operationErr))
 				Expect(retrier.Tries()).To(Equal(1))
 				Expect(operation.TryCallCount()).To(Equal(1))
+				Expect(actualOperation).To(Equal(operation))
 			})
 		})
 
@@ -47,11 +49,12 @@ var _ = Describe("Retrier", func() {
 				operation.TryReturnsOnCall(1, false, nil)
 				retrier := retry.NewRetrier(operation)
 
-				err := retrier.Run()
+				actualOperation, err := retrier.Run()
 
 				Expect(err).NotTo(HaveOccurred())
 				Expect(retrier.Tries()).To(Equal(2))
 				Expect(operation.TryCallCount()).To(Equal(2))
+				Expect(actualOperation).To(Equal(operation))
 			})
 		})
 	})

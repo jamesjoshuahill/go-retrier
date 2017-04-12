@@ -11,16 +11,14 @@ func NewRetrier(operation Operation) Retrier {
 	}
 }
 
-func (r *Retrier) Run() error {
+func (r *Retrier) Run() (Operation, error) {
 	for {
 		r.tries++
 		retry, err := r.operation.Try()
-		if err == nil {
-			return nil
+		if err != nil && retry {
+			continue
 		}
-		if !retry {
-			return err
-		}
+		return r.operation, err
 	}
 }
 
