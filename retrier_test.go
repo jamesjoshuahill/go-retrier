@@ -14,7 +14,7 @@ var _ = Describe("Retrier", func() {
 		It("returns the operation", func() {
 			operation := new(fakes.FakeOperation)
 			operation.TryReturns(nil)
-			failer := new(fakes.FakeFailer)
+			failer := new(fakes.FakeStopper)
 			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
@@ -31,8 +31,8 @@ var _ = Describe("Retrier", func() {
 			operation := new(fakes.FakeOperation)
 			operationErr := errors.New("operation failed")
 			operation.TryReturns(operationErr)
-			failer := new(fakes.FakeFailer)
-			failer.FailReturns(true)
+			failer := new(fakes.FakeStopper)
+			failer.StopReturns(true)
 			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
@@ -49,7 +49,7 @@ var _ = Describe("Retrier", func() {
 			operation := new(fakes.FakeOperation)
 			operation.TryReturnsOnCall(0, errors.New("operation failed"))
 			operation.TryReturnsOnCall(1, nil)
-			failer := new(fakes.FakeFailer)
+			failer := new(fakes.FakeStopper)
 			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
