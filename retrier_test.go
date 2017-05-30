@@ -14,7 +14,8 @@ var _ = Describe("Retrier", func() {
 		It("returns the operation", func() {
 			operation := new(fakes.FakeOperation)
 			operation.TryReturns(nil)
-			retrier := retry.NewRetrier(operation)
+			failer := new(fakes.FakeFailer)
+			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
 
@@ -30,7 +31,9 @@ var _ = Describe("Retrier", func() {
 			operation := new(fakes.FakeOperation)
 			operationErr := errors.New("operation failed")
 			operation.TryReturns(operationErr)
-			retrier := retry.NewRetrier(operation)
+			failer := new(fakes.FakeFailer)
+			failer.FailReturns(true)
+			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
 
@@ -44,9 +47,10 @@ var _ = Describe("Retrier", func() {
 	Context("when the operation has a temporary error", func() {
 		It("trys again", func() {
 			operation := new(fakes.FakeOperation)
-			operation.TryReturnsOnCall(0, temporaryError{})
+			operation.TryReturnsOnCall(0, errors.New("operation failed"))
 			operation.TryReturnsOnCall(1, nil)
-			retrier := retry.NewRetrier(operation)
+			failer := new(fakes.FakeFailer)
+			retrier := retry.NewRetrier(operation, failer)
 
 			actualOperation, err := retrier.Run()
 
@@ -57,8 +61,3 @@ var _ = Describe("Retrier", func() {
 		})
 	})
 })
-
-type temporaryError struct{}
-
-func (e temporaryError) Error() string   { return "temporary error" }
-func (e temporaryError) Temporary() bool { return true }
